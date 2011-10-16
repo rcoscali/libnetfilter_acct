@@ -1,20 +1,24 @@
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 #include <libmnl/libmnl.h>
 #include <libnetfilter_acct/libnetfilter_acct.h>
 
-int main(void)
+int main(int argc, char *argv[])
 {
 	struct mnl_socket *nl;
 	char buf[MNL_SOCKET_BUFFER_SIZE];
 	struct nlmsghdr *nlh;
 	uint32_t portid, seq;
-	struct nfacct nfacct = {
-		.name	= "example",
-		.pkts	= 10,
-		.bytes	= 10,
-	};
+	struct nfacct nfacct;
 	int ret;
+
+	if (argc != 2) {
+		fprintf(stderr, "Usage: %s [name]\n", argv[0]);
+		exit(EXIT_FAILURE);
+	}
+	strncpy(nfacct.name, argv[1], NFACCT_NAME_MAX);
+	nfacct.name[NFACCT_NAME_MAX-1] = '\0';
 
 	nlh = nfacct_add(buf, &nfacct);
 	seq = nlh->nlmsg_seq = time(NULL);
