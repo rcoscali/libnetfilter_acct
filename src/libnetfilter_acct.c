@@ -100,7 +100,7 @@ int nfacct_list_cb(const struct nlmsghdr *nlh, void *data)
 	if (!tb[NFACCT_NAME] && !tb[NFACCT_PKTS] && !tb[NFACCT_BYTES])
 		return MNL_CB_OK;
 
-	if (*full) {
+	if (full) {
 		printf("%s = { pkts = %.12llu,\tbytes = %.12llu }; \n",
 			mnl_attr_get_str(tb[NFACCT_NAME]),
 			mnl_attr_get_u64(tb[NFACCT_PKTS]),
