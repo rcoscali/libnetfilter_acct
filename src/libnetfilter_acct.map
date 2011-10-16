@@ -1,0 +1,15 @@
+LIBNETFILTER_ACCT_1.0 {
+global:
+  nfacct_add;
+  nfacct_list;
+  nfacct_list_cb;
+  nfacct_flush;
+  nfacct_delete;
+  nfacct_list;
+
+local: *;
+};
+
+#LIBNETFILTER_ACCT_1.1 {
+#  _my_new_func;
+#} LIBNETFILTER_ACCT_1.0;
