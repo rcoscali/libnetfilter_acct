@@ -1,1 +1,1 @@
-noinst_HEADERS = nfnetlink_acct.h
+noinst_HEADERS = nfnetlink.h nfnetlink_acct.h
