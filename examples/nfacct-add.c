@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 	char buf[MNL_SOCKET_BUFFER_SIZE];
 	struct nlmsghdr *nlh;
 	uint32_t portid, seq;
-	struct nfacct nfacct;
+	struct nfacct nfacct = {};
 	int ret;
 
 	if (argc != 2) {
