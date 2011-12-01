@@ -10,6 +10,7 @@
 #include "internal.h"
 
 #include <time.h>
+#include <endian.h>
 #include <libmnl/libmnl.h>
 #include <linux/netfilter/nfnetlink.h>
 #include <linux/netfilter/nfnetlink_acct.h>
@@ -32,8 +33,8 @@ struct nlmsghdr *nfacct_add(char *buf, struct nfacct *nfacct)
 	nfh->res_id = 0;
 
 	mnl_attr_put_strz(nlh, NFACCT_NAME, nfacct->name);
-	mnl_attr_put_u64(nlh, NFACCT_PKTS, nfacct->pkts);
-	mnl_attr_put_u64(nlh, NFACCT_PKTS, nfacct->bytes);
+	mnl_attr_put_u64(nlh, NFACCT_PKTS, htobe64(nfacct->pkts));
+	mnl_attr_put_u64(nlh, NFACCT_PKTS, htobe64(nfacct->bytes));
 
 	return nlh;
 }
@@ -103,8 +104,10 @@ int nfacct_list_cb(const struct nlmsghdr *nlh, void *data)
 	if (full) {
 		printf("%s = { pkts = %.12llu,\tbytes = %.12llu }; \n",
 			mnl_attr_get_str(tb[NFACCT_NAME]),
-			mnl_attr_get_u64(tb[NFACCT_PKTS]),
-			mnl_attr_get_u64(tb[NFACCT_BYTES]));
+			(unsigned long long)
+				be64toh(mnl_attr_get_u64(tb[NFACCT_PKTS])),
+			(unsigned long long)
+				be64toh(mnl_attr_get_u64(tb[NFACCT_BYTES])));
 	} else {
 		printf("%s\n", mnl_attr_get_str(tb[NFACCT_NAME]));
 	}
