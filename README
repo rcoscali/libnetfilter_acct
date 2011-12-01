@@ -1,0 +1,61 @@
+= libnetfilter_acct: area-based accounting for netfilter =
+
+Netfilter provides several accounting mechanisms:
+
+* flow-based accouting through ctnetlink
+* packet-based accounting through NFLOG
+
+This library contains the user-space part of a third new mechanism that
+provides area-based accounting.
+
+You have to get the kernel part from:
+
+ git clone -b nf git://1984.lsi.us.es/net
+
+Or you can obtain the patches that apply to 3.2-rc from the cgit interface:
+
+ http:/1984.lsi.us.es/git
+
+Make sure you compile the kernel with NFNETLINK_ACCT and XT_TARGET_NFACCT
+support.
+
+== Flow-based accounting through ctnetlink ==
+
+This mechanism allows you to account the number of packets and bytes
+of one given flow. This information is obtained via netlink event once
+the flow is closed with:
+
+ # conntrack -E
+
+You can get real-time accounting packets and bytes per flow by polling:
+
+ # conntrack -L
+
+== Packet-based accounting through NFLOG ==
+
+This mechanism allows you to add specific iptables rules to log packets
+that match some specific condition:
+
+ # iptables -I INPUT -p tcp --dport 80 -j LOG --log-prefix "http: "
+
+== Area-based accouting ==
+
+This mechanism allows you to create one accounting area:
+
+ libnetfilter_acct/examples# ./nfacct-create http-traffic
+
+Then, you can use it in iptables:
+
+ # iptables -I INPUT -p tcp --dport 80 -j NFACCT --nfacct-name http-traffic
+ # iptables -I OUTPUT -p tcp --sport 80 -j NFACCT --nfacct-name http-traffic
+
+You can obtain the counters via libnetfilter_acct:
+
+ libnetfilter_acct/examples# ./nfacct-get
+ http-traffic = { pkts = 000000061152,   bytes = 000082999936 };
+
+You can perform different actions like dumping the counters and reset them.
+
+--
+(c) 2011 Pablo Neira Ayuso <pablo@netfilter.org>
+(c) 2011 Intra2Net AG <http://www.intra2net.com>
