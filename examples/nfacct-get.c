@@ -9,7 +9,7 @@ int main(void)
 	char buf[MNL_SOCKET_BUFFER_SIZE];
 	struct nlmsghdr *nlh;
 	uint32_t portid, seq;
-	int ret;
+	int ret, full = 1;
 
 	nlh = nfacct_list(buf);
 	seq = nlh->nlmsg_seq = time(NULL);
@@ -33,7 +33,7 @@ int main(void)
 
 	ret = mnl_socket_recvfrom(nl, buf, sizeof(buf));
 	while (ret > 0) {
-		ret = mnl_cb_run(buf, ret, seq, portid, nfacct_list_cb, NULL);
+		ret = mnl_cb_run(buf, ret, seq, portid, nfacct_list_cb, &full);
 		if (ret <= 0)
 			break;
 		ret = mnl_socket_recvfrom(nl, buf, sizeof(buf));
