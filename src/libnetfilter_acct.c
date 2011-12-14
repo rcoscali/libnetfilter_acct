@@ -40,13 +40,17 @@ struct nlmsghdr *nfacct_add(char *buf, struct nfacct *nfacct)
 }
 EXPORT_SYMBOL(nfacct_add);
 
-struct nlmsghdr *nfacct_list(char *buf)
+struct nlmsghdr *nfacct_list(char *buf, bool ctrzero)
 {
 	struct nlmsghdr *nlh;
 	struct nfgenmsg *nfh;
+	uint32_t msg_type = NFNL_MSG_ACCT_GET;
+
+	if (ctrzero)
+		msg_type = NFNL_MSG_ACCT_GET_CTRZERO;
 
 	nlh = mnl_nlmsg_put_header(buf);
-	nlh->nlmsg_type = (NFNL_SUBSYS_ACCT << 8) | NFNL_MSG_ACCT_GET;
+	nlh->nlmsg_type = (NFNL_SUBSYS_ACCT << 8) | msg_type;
 	nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_DUMP;
 	nlh->nlmsg_seq = time(NULL);
 
