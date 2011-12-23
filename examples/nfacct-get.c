@@ -1,17 +1,27 @@
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <libmnl/libmnl.h>
 #include <libnetfilter_acct/libnetfilter_acct.h>
 
-int main(void)
+int main(int argc, char *argv[])
 {
 	struct mnl_socket *nl;
 	char buf[MNL_SOCKET_BUFFER_SIZE];
 	struct nlmsghdr *nlh;
 	uint32_t portid, seq;
 	int ret, full = 1;
+	bool zeroctr = false;
 
-	nlh = nfacct_list(buf);
+	if (argc > 2) {
+		fprintf(stderr, "Usage: %s [-z]\n", argv[0]);
+		exit(EXIT_FAILURE);
+	}
+
+	if (argc == 2 && strncmp(argv[1], "-z", strlen("-z")) == 0)
+		zeroctr = true;
+
+	nlh = nfacct_list(buf, zeroctr);
 	seq = nlh->nlmsg_seq = time(NULL);
 
 	nl = mnl_socket_open(NETLINK_NETFILTER);
