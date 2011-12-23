@@ -1,8 +1,9 @@
 #ifndef _NFNL_ACCT_H_
 #define _NFNL_ACCT_H_
-#include <linux/netfilter/nfnetlink.h>
 
-#define NFACCT_NAME_MAX		64
+#ifndef NFACCT_NAME_MAX
+#define NFACCT_NAME_MAX		32
+#endif
 
 enum nfnl_acct_msg_types {
 	NFNL_MSG_ACCT_NEW,
@@ -17,6 +18,7 @@ enum nfnl_acct_type {
 	NFACCT_NAME,
 	NFACCT_PKTS,
 	NFACCT_BYTES,
+	NFACCT_USE,
 	__NFACCT_MAX
 };
 #define NFACCT_MAX (__NFACCT_MAX - 1)
