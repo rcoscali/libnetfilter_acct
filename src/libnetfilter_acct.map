@@ -1,11 +1,18 @@
 LIBNETFILTER_ACCT_1.0 {
 global:
-  nfacct_add;
-  nfacct_list;
-  nfacct_list_cb;
-  nfacct_flush;
-  nfacct_delete;
-  nfacct_list;
+  nfacct_alloc;
+  nfacct_free;
+  nfacct_attr_set;
+  nfacct_attr_set_str;
+  nfacct_attr_set_u64;
+  nfacct_attr_unset;
+  nfacct_attr_get;
+  nfacct_attr_get_str;
+  nfacct_attr_get_u64;
+  nfacct_nlmsg_build_hdr;
+  nfacct_nlmsg_build_payload;
+  nfacct_nlmsg_parse_payload;
+  nfacct_snprintf;
 
 local: *;
 };

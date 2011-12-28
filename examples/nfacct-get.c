@@ -4,6 +4,31 @@
 #include <libmnl/libmnl.h>
 #include <libnetfilter_acct/libnetfilter_acct.h>
 
+static int nfacct_cb(const struct nlmsghdr *nlh, void *data)
+{
+	struct nfacct *nfacct;
+	char buf[4096];
+
+	nfacct = nfacct_alloc();
+	if (nfacct == NULL) {
+		perror("OOM");
+		goto err;
+	}
+
+	if (nfacct_nlmsg_parse_payload(nlh, nfacct) < 0) {
+		perror("nfacct_parse_nl_msg");
+		goto err_free;
+	}
+
+	nfacct_snprintf(buf, sizeof(buf), nfacct, NFACCT_SNPRINTF_F_FULL);
+	printf("%s\n", buf);
+
+err_free:
+	nfacct_free(nfacct);
+err:
+	return MNL_CB_OK;
+}
+
 int main(int argc, char *argv[])
 {
 	struct mnl_socket *nl;
@@ -21,8 +46,11 @@ int main(int argc, char *argv[])
 	if (argc == 2 && strncmp(argv[1], "-z", strlen("-z")) == 0)
 		zeroctr = true;
 
-	nlh = nfacct_list(buf, zeroctr);
-	seq = nlh->nlmsg_seq = time(NULL);
+	seq = time(NULL);
+	nlh = nfacct_nlmsg_build_hdr(buf, zeroctr ?
+					NFNL_MSG_ACCT_GET_CTRZERO :
+					NFNL_MSG_ACCT_GET,
+				     NLM_F_DUMP, seq);
 
 	nl = mnl_socket_open(NETLINK_NETFILTER);
 	if (nl == NULL) {
@@ -43,7 +71,7 @@ int main(int argc, char *argv[])
 
 	ret = mnl_socket_recvfrom(nl, buf, sizeof(buf));
 	while (ret > 0) {
-		ret = mnl_cb_run(buf, ret, seq, portid, nfacct_list_cb, &full);
+		ret = mnl_cb_run(buf, ret, seq, portid, nfacct_cb, &full);
 		if (ret <= 0)
 			break;
 		ret = mnl_socket_recvfrom(nl, buf, sizeof(buf));

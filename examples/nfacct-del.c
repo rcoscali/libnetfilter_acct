@@ -27,8 +27,8 @@ int main(int argc, char *argv[])
 	nfacct_attr_set(nfacct, NFACCT_ATTR_NAME, argv[1]);
 
 	seq = time(NULL);
-	nlh = nfacct_nlmsg_build_hdr(buf, NFNL_MSG_ACCT_NEW,
-				     NLM_F_CREATE | NLM_F_ACK, seq);
+	nlh = nfacct_nlmsg_build_hdr(buf, NFNL_MSG_ACCT_DEL,
+				     NLM_F_ACK, seq);
 	nfacct_nlmsg_build_payload(nlh, nfacct);
 
 	nfacct_free(nfacct);

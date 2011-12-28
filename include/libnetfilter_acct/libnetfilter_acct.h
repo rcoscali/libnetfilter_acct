@@ -4,16 +4,34 @@
 #include <sys/types.h>
 #include <linux/netfilter/nfnetlink_acct.h>
 
-struct nfacct {
-	char		name[NFACCT_NAME_MAX];
-	uint64_t	pkts;
-	uint64_t	bytes;
+struct nfacct;
+
+enum nfacct_attr_type {
+	NFACCT_ATTR_NAME = 0,
+	NFACCT_ATTR_PKTS,
+	NFACCT_ATTR_BYTES,
 };
 
-struct nlmsghdr *nfacct_add(char *buf, struct nfacct *nfacct);
-struct nlmsghdr *nfacct_list(char *buf, bool ctrzero);
-int nfacct_list_cb(const struct nlmsghdr *nlh, void *data);
-struct nlmsghdr *nfacct_flush(char *buf);
-struct nlmsghdr *nfacct_delete(char *buf, const char *filter_name);
+struct nfacct *nfacct_alloc(void);
+void nfacct_free(struct nfacct *nfacct);
+
+void nfacct_attr_set(struct nfacct *nfacct, enum nfacct_attr_type type, const void *data);
+void nfacct_attr_set_str(struct nfacct *nfacct, enum nfacct_attr_type type, const char *name);
+void nfacct_attr_set_u64(struct nfacct *nfacct, enum nfacct_attr_type type, uint64_t value);
+void nfacct_attr_unset(struct nfacct *nfacct, enum nfacct_attr_type type);
+
+const void *nfacct_attr_get(struct nfacct *nfacct, enum nfacct_attr_type type);
+const char *nfacct_attr_get_str(struct nfacct *nfacct, enum nfacct_attr_type type);
+uint64_t nfacct_attr_get_u64(struct nfacct *nfacct, enum nfacct_attr_type type);
+
+struct nlmsghdr;
+
+struct nlmsghdr *nfacct_nlmsg_build_hdr(char *buf, uint8_t cmd, uint16_t flags, uint32_t seq);
+void nfacct_nlmsg_build_payload(struct nlmsghdr *nlh, struct nfacct *nfacct);
+int nfacct_nlmsg_parse_payload(const struct nlmsghdr *nlh, struct nfacct *nfacct);
+
+#define NFACCT_SNPRINTF_F_FULL	(1 << 0)
+
+int nfacct_snprintf(char *buf, size_t size, struct nfacct *nfacct, unsigned int flags);
 
 #endif
