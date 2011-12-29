@@ -1,3 +1,4 @@
+/* This example is in the public domain. */
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
