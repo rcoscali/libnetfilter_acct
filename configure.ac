@@ -1,16 +1,18 @@
 dnl Process this file with autoconf to create configure.
 
 AC_INIT([libnetfilter_acct], [1.0.0])
+AC_CONFIG_AUX_DIR([build-aux])
 AC_CANONICAL_HOST
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
-AM_INIT_AUTOMAKE([foreign dist-bzip2 1.6 subdir-objects])
+
+AM_INIT_AUTOMAKE([foreign tar-pax no-dist-gzip dist-bzip2 1.6 subdir-objects])
 
 dnl kernel style compile messages
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 dnl Dependencies
-PKG_CHECK_MODULES([LIBMNL], [libmnl >= 1.0.1])
+PKG_CHECK_MODULES([LIBMNL], [libmnl >= 1.0.0])
 
 AC_PROG_CC
 AM_PROG_CC_C_O
