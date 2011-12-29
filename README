@@ -1,23 +1,13 @@
-= libnetfilter_acct: area-based accounting for netfilter =
+= nfacct: the extended accounting infrastructure for Netfilter =
 
-Netfilter provides several accounting mechanisms:
+Netfilter provides three accounting mechanisms:
 
-* flow-based accouting through ctnetlink
+* flow-based accounting through ctnetlink
 * packet-based accounting through NFLOG
+* extended accounting through nfacct (since Linux 3.3)
 
-This library contains the user-space part of a third new mechanism that
-provides area-based accounting.
-
-You have to get the kernel part from:
-
- git clone -b nf git://1984.lsi.us.es/net
-
-Or you can obtain the patches that apply to 3.2-rc from the cgit interface:
-
- http:/1984.lsi.us.es/git
-
-Make sure you compile the kernel with NFNETLINK_ACCT and XT_TARGET_NFACCT
-support.
+The libnetfilter_acct library provides the programming interface (API)
+for the extended accounting infrastructure.
 
 == Flow-based accounting through ctnetlink ==
 
@@ -38,23 +28,27 @@ that match some specific condition:
 
  # iptables -I INPUT -p tcp --dport 80 -j LOG --log-prefix "http: "
 
-== Area-based accouting ==
+== nfacct: extended accounting infrastructure ==
 
-This mechanism allows you to create one accounting area:
+This mechanism allows you to create one accounting object:
 
- libnetfilter_acct/examples# ./nfacct-create http-traffic
+ libnetfilter_acct/examples# ./nfacct-add http-traffic
 
 Then, you can use it in iptables:
 
- # iptables -I INPUT -p tcp --dport 80 -j NFACCT --nfacct-name http-traffic
- # iptables -I OUTPUT -p tcp --sport 80 -j NFACCT --nfacct-name http-traffic
+ # iptables -I INPUT -p tcp --dport 80 -m nfacct --nfacct-name http-traffic
+ # iptables -I OUTPUT -p tcp --sport 80 -m nfacct --nfacct-name http-traffic
 
 You can obtain the counters via libnetfilter_acct:
 
  libnetfilter_acct/examples# ./nfacct-get
  http-traffic = { pkts = 000000061152,   bytes = 000082999936 };
 
-You can perform different actions like dumping the counters and reset them.
+To enable the extended accounting infrastructure in kernel-space, make sure
+you enable NFNETLINK_ACCT and XT_MATCH_NFACCT config options in your Linux
+kernel.
+
+For further information, please refer to the doxygen documentation available.
 
 --
 (c) 2011 Pablo Neira Ayuso <pablo@netfilter.org>
