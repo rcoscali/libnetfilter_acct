@@ -29,5 +29,5 @@ regular_CFLAGS="-Wall -Waggregate-return -Wmissing-declarations \
 	-Wformat=2 -pipe"
 AC_SUBST([regular_CPPFLAGS])
 AC_SUBST([regular_CFLAGS])
-AC_CONFIG_FILES([Makefile src/Makefile include/Makefile include/libnetfilter_acct/Makefile include/linux/Makefile include/linux/netfilter/Makefile examples/Makefile libnetfilter_acct.pc])
+AC_CONFIG_FILES([Makefile src/Makefile include/Makefile include/libnetfilter_acct/Makefile include/linux/Makefile include/linux/netfilter/Makefile examples/Makefile libnetfilter_acct.pc doxygen.cfg])
 AC_OUTPUT
