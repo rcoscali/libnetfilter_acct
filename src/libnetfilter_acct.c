@@ -240,12 +240,12 @@ int nfacct_snprintf(char *buf, size_t size, struct nfacct *nfacct,
 
 	if (flags & NFACCT_SNPRINTF_F_FULL) {
 		ret = snprintf(buf, size,
-			"%s = { pkts = %.12llu,\tbytes = %.12llu };",
-			nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME),
+			"{ pkts = %.20llu, bytes = %.20llu } = %s;",
 			(unsigned long long)
 			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES),
 			(unsigned long long)
-			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_PKTS));
+			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_PKTS),
+			nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME));
 	} else {
 		ret = snprintf(buf, size, "%s\n",
 			nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME));
