@@ -318,13 +318,13 @@ EXPORT_SYMBOL(nfacct_nlmsg_build_hdr);
  */
 void nfacct_nlmsg_build_payload(struct nlmsghdr *nlh, struct nfacct *nfacct)
 {
-	if (nfacct->name)
+	if (nfacct->bitset & (1 << NFACCT_ATTR_NAME))
 		mnl_attr_put_strz(nlh, NFACCT_NAME, nfacct->name);
 
-	if (nfacct->pkts)
+	if (nfacct->bitset & (1 << NFACCT_ATTR_PKTS))
 		mnl_attr_put_u64(nlh, NFACCT_PKTS, htobe64(nfacct->pkts));
 
-	if (nfacct->bytes)
+	if (nfacct->bitset & (1 << NFACCT_ATTR_BYTES))
 		mnl_attr_put_u64(nlh, NFACCT_PKTS, htobe64(nfacct->bytes));
 }
 EXPORT_SYMBOL(nfacct_nlmsg_build_payload);
