@@ -181,13 +181,16 @@ const void *nfacct_attr_get(struct nfacct *nfacct, enum nfacct_attr_type type)
 
 	switch(type) {
 	case NFACCT_ATTR_NAME:
-		ret = nfacct->name;
+		if (nfacct->bitset & (1 << NFACCT_ATTR_NAME))
+			ret = nfacct->name;
 		break;
 	case NFACCT_ATTR_PKTS:
-		ret = &nfacct->pkts;
+		if (nfacct->bitset & (1 << NFACCT_ATTR_PKTS))
+			ret = &nfacct->pkts;
 		break;
 	case NFACCT_ATTR_BYTES:
-		ret = &nfacct->bytes;
+		if (nfacct->bitset & (1 << NFACCT_ATTR_BYTES))
+			ret = &nfacct->bytes;
 		break;
 	}
 	return ret;
@@ -219,7 +222,8 @@ EXPORT_SYMBOL(nfacct_attr_get_str);
  */
 uint64_t nfacct_attr_get_u64(struct nfacct *nfacct, enum nfacct_attr_type type)
 {
-	return *((uint64_t *)nfacct_attr_get(nfacct, type));
+	const void *ret = nfacct_attr_get(nfacct, type);
+	return ret ? *((uint64_t *)ret) : 0;
 }
 EXPORT_SYMBOL(nfacct_attr_get_u64);
 
