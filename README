@@ -50,6 +50,23 @@ kernel.
 
 For further information, please refer to the doxygen documentation available.
 
+== Compilation & Installation ==
+
+First, you have to run:
+
+ autoreconf -fi
+
+If you got a working copy from git. Then:
+
+ ./configure --prefix=/usr
+ make
+ make check # if you want to build the library examples
+ sudo make install
+
+== Licensing terms ==
+
+This library is licensed under LGPLv2.1+.
+
 --
 (c) 2011 Pablo Neira Ayuso <pablo@netfilter.org>
 (c) 2011 Intra2Net AG <http://www.intra2net.com>
