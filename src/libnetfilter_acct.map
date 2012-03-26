@@ -12,11 +12,13 @@ global:
   nfacct_nlmsg_build_hdr;
   nfacct_nlmsg_build_payload;
   nfacct_nlmsg_parse_payload;
-  nfacct_snprintf;
+  /* nfacct_snprintf prototype was modified, new version in 1.1.
+     I decided not to keep the old symbol compatibility. See git log
+     for more information. */
 
 local: *;
 };
 
-#LIBNETFILTER_ACCT_1.1 {
-#  _my_new_func;
-#} LIBNETFILTER_ACCT_1.0;
+LIBNETFILTER_ACCT_1.1 {
+  nfacct_snprintf;
+} LIBNETFILTER_ACCT_1.0;

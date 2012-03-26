@@ -232,27 +232,46 @@ EXPORT_SYMBOL(nfacct_attr_get_u64);
  * \param buf: pointer to buffer that is used to print the object
  * \param size: size of the buffer (or remaining room in it).
  * \param nfacct: pointer to a valid accounting object.
+ * \param type: format output type, NFACCT_SNPRINTF_T_[PLAIN|XML]
  * \param flags: output flags (NFACCT_SNPRINTF_F_FULL).
  *
  * This function returns -1 in case that some mandatory attributes are
  * missing. On sucess, it returns 0.
  */
 int nfacct_snprintf(char *buf, size_t size, struct nfacct *nfacct,
-		    unsigned int flags)
+		    uint16_t type, uint16_t flags)
 {
-	int ret;
+	int ret = 0;
 
-	if (flags & NFACCT_SNPRINTF_F_FULL) {
+	switch(type) {
+	case NFACCT_SNPRINTF_T_PLAIN:
+		if (flags & NFACCT_SNPRINTF_F_FULL) {
+			ret = snprintf(buf, size,
+				"{ pkts = %.20llu, bytes = %.20llu } = %s;",
+				(unsigned long long)
+				nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES),
+				(unsigned long long)
+				nfacct_attr_get_u64(nfacct, NFACCT_ATTR_PKTS),
+				nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME));
+		} else {
+			ret = snprintf(buf, size, "%s\n",
+				nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME));
+		}
+		break;
+	case NFACCT_SNPRINTF_T_XML:
 		ret = snprintf(buf, size,
-			"{ pkts = %.20llu, bytes = %.20llu } = %s;",
-			(unsigned long long)
-			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES),
-			(unsigned long long)
-			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_PKTS),
-			nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME));
-	} else {
-		ret = snprintf(buf, size, "%s\n",
-			nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME));
+				"<obj><name>%s</name>"
+				"<pkts>%.20llu</pkts>"
+				"<bytes>%.20llu</bytes></obj>",
+				nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME),
+				(unsigned long long)
+				nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES),
+				(unsigned long long)
+				nfacct_attr_get_u64(nfacct, NFACCT_ATTR_PKTS));
+		break;
+	default:
+		ret = -1;
+		break;
 	}
 	return ret;
 }

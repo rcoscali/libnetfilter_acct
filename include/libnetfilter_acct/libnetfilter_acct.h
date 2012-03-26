@@ -32,6 +32,9 @@ int nfacct_nlmsg_parse_payload(const struct nlmsghdr *nlh, struct nfacct *nfacct
 
 #define NFACCT_SNPRINTF_F_FULL	(1 << 0)
 
-int nfacct_snprintf(char *buf, size_t size, struct nfacct *nfacct, unsigned int flags);
+#define NFACCT_SNPRINTF_T_PLAIN 0
+#define NFACCT_SNPRINTF_T_XML 1
+
+int nfacct_snprintf(char *buf, size_t size, struct nfacct *nfacct, uint16_t type, uint16_t flags);
 
 #endif
