@@ -21,7 +21,8 @@ static int nfacct_cb(const struct nlmsghdr *nlh, void *data)
 		goto err_free;
 	}
 
-	nfacct_snprintf(buf, sizeof(buf), nfacct, NFACCT_SNPRINTF_F_FULL);
+	nfacct_snprintf(buf, sizeof(buf), nfacct,
+			NFACCT_SNPRINTF_T_PLAIN, NFACCT_SNPRINTF_F_FULL);
 	printf("%s\n", buf);
 
 err_free:
