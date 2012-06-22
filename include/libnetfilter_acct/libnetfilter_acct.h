@@ -30,7 +30,8 @@ struct nlmsghdr *nfacct_nlmsg_build_hdr(char *buf, uint8_t cmd, uint16_t flags, 
 void nfacct_nlmsg_build_payload(struct nlmsghdr *nlh, struct nfacct *nfacct);
 int nfacct_nlmsg_parse_payload(const struct nlmsghdr *nlh, struct nfacct *nfacct);
 
-#define NFACCT_SNPRINTF_F_FULL	(1 << 0)
+#define NFACCT_SNPRINTF_F_FULL		(1 << 0)
+#define NFACCT_SNPRINTF_F_TIME		(1 << 1)
 
 #define NFACCT_SNPRINTF_T_PLAIN 0
 #define NFACCT_SNPRINTF_T_XML 1

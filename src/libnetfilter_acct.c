@@ -227,6 +227,103 @@ uint64_t nfacct_attr_get_u64(struct nfacct *nfacct, enum nfacct_attr_type type)
 }
 EXPORT_SYMBOL(nfacct_attr_get_u64);
 
+static int
+nfacct_snprintf_plain(char *buf, size_t rem, struct nfacct *nfacct,
+		      uint16_t flags)
+{
+	int ret;
+
+	if (flags & NFACCT_SNPRINTF_F_FULL) {
+		ret = snprintf(buf, rem,
+			"{ pkts = %.20llu, bytes = %.20llu } = %s;",
+			(unsigned long long)
+			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES),
+			(unsigned long long)
+			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_PKTS),
+			nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME));
+	} else {
+		ret = snprintf(buf, rem, "%s\n",
+			nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME));
+	}
+
+	return ret;
+}
+
+#define BUFFER_SIZE(ret, size, rem, offset)		\
+	size += ret;					\
+	if (ret > rem)					\
+		ret = rem;				\
+	offset += ret;					\
+	rem -= ret;
+
+static int
+nfacct_snprintf_xml_localtime(char *buf, unsigned int rem, const struct tm *tm)
+{
+        int ret = 0;
+        unsigned int size = 0, offset = 0;
+
+        ret = snprintf(buf+offset, rem, "<hour>%d</hour>", tm->tm_hour);
+        BUFFER_SIZE(ret, size, rem, offset);
+
+        ret = snprintf(buf+offset, rem, "<min>%02d</min>", tm->tm_min);
+        BUFFER_SIZE(ret, size, rem, offset);
+
+        ret = snprintf(buf+offset, rem, "<sec>%02d</sec>", tm->tm_sec);
+        BUFFER_SIZE(ret, size, rem, offset);
+
+        ret = snprintf(buf+offset, rem, "<wday>%d</wday>", tm->tm_wday + 1);
+        BUFFER_SIZE(ret, size, rem, offset);
+
+        ret = snprintf(buf+offset, rem, "<day>%d</day>", tm->tm_mday);
+        BUFFER_SIZE(ret, size, rem, offset);
+
+        ret = snprintf(buf+offset, rem, "<month>%d</month>", tm->tm_mon + 1);
+        BUFFER_SIZE(ret, size, rem, offset);
+
+        ret = snprintf(buf+offset, rem, "<year>%d</year>", 1900 + tm->tm_year);
+        BUFFER_SIZE(ret, size, rem, offset);
+
+        return size;
+}
+
+
+static int
+nfacct_snprintf_xml(char *buf, size_t rem, struct nfacct *nfacct,
+		    uint16_t flags)
+{
+	int ret = 0;
+	unsigned int size = 0, offset = 0;
+
+	ret = snprintf(buf, rem,
+			"<obj><name>%s</name>"
+			"<pkts>%.20llu</pkts>"
+			"<bytes>%.20llu</bytes>",
+			nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME),
+			(unsigned long long)
+			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES),
+			(unsigned long long)
+			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_PKTS));
+	BUFFER_SIZE(ret, size, rem, offset);
+
+	if (flags & NFACCT_SNPRINTF_F_TIME) {
+		time_t t;
+		struct tm tm;
+
+		t = time(NULL);
+		if (localtime_r(&t, &tm) == NULL)
+			goto err;
+
+		ret = nfacct_snprintf_xml_localtime(buf+offset, rem, &tm);
+	        BUFFER_SIZE(ret, size, rem, offset);
+	}
+
+	ret = snprintf(buf+offset, rem, "</obj>");
+	BUFFER_SIZE(ret, size, rem, offset);
+
+err:
+	return ret;
+}
+
 /**
  * nfacct_snprintf - print accounting object into one buffer
  * \param buf: pointer to buffer that is used to print the object
@@ -245,29 +342,10 @@ int nfacct_snprintf(char *buf, size_t size, struct nfacct *nfacct,
 
 	switch(type) {
 	case NFACCT_SNPRINTF_T_PLAIN:
-		if (flags & NFACCT_SNPRINTF_F_FULL) {
-			ret = snprintf(buf, size,
-				"{ pkts = %.20llu, bytes = %.20llu } = %s;",
-				(unsigned long long)
-				nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES),
-				(unsigned long long)
-				nfacct_attr_get_u64(nfacct, NFACCT_ATTR_PKTS),
-				nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME));
-		} else {
-			ret = snprintf(buf, size, "%s\n",
-				nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME));
-		}
+		ret = nfacct_snprintf_plain(buf, size, nfacct, flags);
 		break;
 	case NFACCT_SNPRINTF_T_XML:
-		ret = snprintf(buf, size,
-				"<obj><name>%s</name>"
-				"<pkts>%.20llu</pkts>"
-				"<bytes>%.20llu</bytes></obj>",
-				nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME),
-				(unsigned long long)
-				nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES),
-				(unsigned long long)
-				nfacct_attr_get_u64(nfacct, NFACCT_ATTR_PKTS));
+		ret = nfacct_snprintf_xml(buf, size, nfacct, flags);
 		break;
 	default:
 		ret = -1;
