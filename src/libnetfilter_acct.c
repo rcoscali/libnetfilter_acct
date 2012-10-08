@@ -208,7 +208,7 @@ EXPORT_SYMBOL(nfacct_attr_get);
 const char *
 nfacct_attr_get_str(struct nfacct *nfacct, enum nfacct_attr_type type)
 {
-	return (char *)nfacct_attr_get(nfacct, type);
+	return nfacct_attr_get(nfacct, type);
 }
 EXPORT_SYMBOL(nfacct_attr_get_str);
 
@@ -235,10 +235,8 @@ nfacct_snprintf_plain(char *buf, size_t rem, struct nfacct *nfacct,
 
 	if (flags & NFACCT_SNPRINTF_F_FULL) {
 		ret = snprintf(buf, rem,
-			"{ pkts = %.20llu, bytes = %.20llu } = %s;",
-			(unsigned long long)
+			"{ pkts = %.20lu, bytes = %.20lu } = %s;",
 			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES),
-			(unsigned long long)
 			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_PKTS),
 			nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME));
 	} else {
@@ -296,12 +294,10 @@ nfacct_snprintf_xml(char *buf, size_t rem, struct nfacct *nfacct,
 
 	ret = snprintf(buf, rem,
 			"<obj><name>%s</name>"
-			"<pkts>%.20llu</pkts>"
-			"<bytes>%.20llu</bytes>",
+			"<pkts>%.20lu</pkts>"
+			"<bytes>%.20lu</bytes>",
 			nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME),
-			(unsigned long long)
 			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES),
-			(unsigned long long)
 			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_PKTS));
 	BUFFER_SIZE(ret, size, rem, offset);
 
