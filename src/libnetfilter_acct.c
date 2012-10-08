@@ -442,11 +442,6 @@ static int nfacct_nlmsg_parse_attr_cb(const struct nlattr *attr, void *data)
 		}
 		break;
 	case NFACCT_PKTS:
-		if (mnl_attr_validate(attr, MNL_TYPE_U64) < 0) {
-			perror("mnl_attr_validate");
-			return MNL_CB_ERROR;
-		}
-		break;
 	case NFACCT_BYTES:
 		if (mnl_attr_validate(attr, MNL_TYPE_U64) < 0) {
 			perror("mnl_attr_validate");
