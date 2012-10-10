@@ -235,8 +235,10 @@ nfacct_snprintf_plain(char *buf, size_t rem, struct nfacct *nfacct,
 
 	if (flags & NFACCT_SNPRINTF_F_FULL) {
 		ret = snprintf(buf, rem,
-			"{ pkts = %.20lu, bytes = %.20lu } = %s;",
+			"{ pkts = %.20llu, bytes = %.20llu } = %s;",
+			(unsigned long long)
 			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES),
+			(unsigned long long)
 			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_PKTS),
 			nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME));
 	} else {
@@ -294,10 +296,12 @@ nfacct_snprintf_xml(char *buf, size_t rem, struct nfacct *nfacct,
 
 	ret = snprintf(buf, rem,
 			"<obj><name>%s</name>"
-			"<pkts>%.20lu</pkts>"
-			"<bytes>%.20lu</bytes>",
+			"<pkts>%.20llu</pkts>"
+			"<bytes>%.20llu</bytes>",
 			nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME),
+			(unsigned long long)
 			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES),
+			(unsigned long long)
 			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_PKTS));
 	BUFFER_SIZE(ret, size, rem, offset);
 
