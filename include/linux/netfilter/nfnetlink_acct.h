@@ -1,5 +1,5 @@
-#ifndef _NFNL_ACCT_H_
-#define _NFNL_ACCT_H_
+#ifndef _UAPI_NFNL_ACCT_H_
+#define _UAPI_NFNL_ACCT_H_
 
 #ifndef NFACCT_NAME_MAX
 #define NFACCT_NAME_MAX		32
@@ -23,14 +23,5 @@ enum nfnl_acct_type {
 };
 #define NFACCT_MAX (__NFACCT_MAX - 1)
 
-#ifdef __KERNEL__
 
-struct nf_acct;
-
-extern struct nf_acct *nfnl_acct_find_get(const char *filter_name);
-extern void nfnl_acct_put(struct nf_acct *acct);
-extern void nfnl_acct_update(const struct sk_buff *skb, struct nf_acct *nfacct);
-
-#endif /* __KERNEL__ */
-
-#endif /* _NFNL_ACCT_H */
+#endif /* _UAPI_NFNL_ACCT_H_ */
