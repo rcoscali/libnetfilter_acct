@@ -2,6 +2,7 @@
 #define _LIBNETFILTER_ACCT_H_
 
 #include <sys/types.h>
+#include <stdint.h>
 #include <linux/netfilter/nfnetlink_acct.h>
 
 struct nfacct;
