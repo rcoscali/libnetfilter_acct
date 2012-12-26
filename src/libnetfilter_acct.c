@@ -106,11 +106,11 @@ nfacct_attr_set(struct nfacct *nfacct, enum nfacct_attr_type type,
 		nfacct->bitset |= (1 << NFACCT_ATTR_NAME);
 		break;
 	case NFACCT_ATTR_PKTS:
-		nfacct->bytes = *((uint64_t *) data);
+		nfacct->pkts = *((uint64_t *) data);
 		nfacct->bitset |= (1 << NFACCT_ATTR_PKTS);
 		break;
 	case NFACCT_ATTR_BYTES:
-		nfacct->pkts = *((uint64_t *) data);
+		nfacct->bytes = *((uint64_t *) data);
 		nfacct->bitset |= (1 << NFACCT_ATTR_BYTES);
 		break;
 	}
@@ -237,9 +237,9 @@ nfacct_snprintf_plain(char *buf, size_t rem, struct nfacct *nfacct,
 		ret = snprintf(buf, rem,
 			"{ pkts = %.20llu, bytes = %.20llu } = %s;",
 			(unsigned long long)
-			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES),
-			(unsigned long long)
 			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_PKTS),
+			(unsigned long long)
+			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES),
 			nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME));
 	} else {
 		ret = snprintf(buf, rem, "%s\n",
@@ -426,7 +426,7 @@ void nfacct_nlmsg_build_payload(struct nlmsghdr *nlh, struct nfacct *nfacct)
 		mnl_attr_put_u64(nlh, NFACCT_PKTS, htobe64(nfacct->pkts));
 
 	if (nfacct->bitset & (1 << NFACCT_ATTR_BYTES))
-		mnl_attr_put_u64(nlh, NFACCT_PKTS, htobe64(nfacct->bytes));
+		mnl_attr_put_u64(nlh, NFACCT_BYTES, htobe64(nfacct->bytes));
 }
 EXPORT_SYMBOL(nfacct_nlmsg_build_payload);
 
