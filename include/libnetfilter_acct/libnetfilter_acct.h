@@ -1,9 +1,14 @@
 #ifndef _LIBNETFILTER_ACCT_H_
 #define _LIBNETFILTER_ACCT_H_
 
-#include <sys/types.h>
 #include <stdint.h>
 #include <linux/netfilter/nfnetlink_acct.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <sys/types.h>
 
 struct nfacct;
 
@@ -38,5 +43,9 @@ int nfacct_nlmsg_parse_payload(const struct nlmsghdr *nlh, struct nfacct *nfacct
 #define NFACCT_SNPRINTF_T_XML 1
 
 int nfacct_snprintf(char *buf, size_t size, struct nfacct *nfacct, uint16_t type, uint16_t flags);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
 #endif
