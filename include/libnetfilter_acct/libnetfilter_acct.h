@@ -8,8 +8,6 @@
 extern "C" {
 #endif
 
-#include <sys/types.h>
-
 struct nfacct;
 
 enum nfacct_attr_type {
