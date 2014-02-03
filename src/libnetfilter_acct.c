@@ -298,8 +298,8 @@ nfacct_snprintf_xml(char *buf, size_t rem, struct nfacct *nfacct,
 			"<pkts>%.20"PRIu64"</pkts>"
 			"<bytes>%.20"PRIu64"</bytes>",
 			nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME),
-			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES),
-			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_PKTS));
+			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_PKTS),
+			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES));
 	BUFFER_SIZE(ret, size, rem, offset);
 
 	if (flags & NFACCT_SNPRINTF_F_TIME) {
