@@ -61,6 +61,8 @@ struct nfacct {
 	uint64_t	pkts;
 	uint64_t	bytes;
 	uint32_t	bitset;
+	uint32_t	flags;
+	uint64_t	quota;
 };
 
 /**
@@ -114,6 +116,14 @@ nfacct_attr_set(struct nfacct *nfacct, enum nfacct_attr_type type,
 		nfacct->bytes = *((uint64_t *) data);
 		nfacct->bitset |= (1 << NFACCT_ATTR_BYTES);
 		break;
+	case NFACCT_ATTR_FLAGS:
+		nfacct->flags = *((uint32_t *) data);
+		nfacct->bitset |= (1 << NFACCT_ATTR_FLAGS);
+		break;
+	case NFACCT_ATTR_QUOTA:
+		nfacct->quota = *((uint64_t *) data);
+		nfacct->bitset |= (1 << NFACCT_ATTR_QUOTA);
+		break;
 	}
 }
 EXPORT_SYMBOL(nfacct_attr_set);
@@ -164,6 +174,12 @@ nfacct_attr_unset(struct nfacct *nfacct, enum nfacct_attr_type type)
 	case NFACCT_ATTR_BYTES:
 		nfacct->bitset &= ~(1 << NFACCT_ATTR_BYTES);
 		break;
+	case NFACCT_ATTR_FLAGS:
+		nfacct->bitset &= ~(1 << NFACCT_ATTR_FLAGS);
+		break;
+	case NFACCT_ATTR_QUOTA:
+		nfacct->bitset &= ~(1 << NFACCT_ATTR_QUOTA);
+		break;
 	}
 }
 EXPORT_SYMBOL(nfacct_attr_unset);
@@ -192,6 +208,14 @@ const void *nfacct_attr_get(struct nfacct *nfacct, enum nfacct_attr_type type)
 	case NFACCT_ATTR_BYTES:
 		if (nfacct->bitset & (1 << NFACCT_ATTR_BYTES))
 			ret = &nfacct->bytes;
+		break;
+	case NFACCT_ATTR_FLAGS:
+		if (nfacct->bitset & (1 << NFACCT_ATTR_FLAGS))
+			ret = &nfacct->flags;
+		break;
+	case NFACCT_ATTR_QUOTA:
+		if (nfacct->bitset & (1 << NFACCT_ATTR_QUOTA))
+			ret = &nfacct->quota;
 		break;
 	}
 	return ret;
@@ -232,13 +256,35 @@ static int
 nfacct_snprintf_plain(char *buf, size_t rem, struct nfacct *nfacct,
 		      uint16_t flags)
 {
-	int ret;
+	int ret, temp;
+	char *walking_buf;
+
+	temp = rem;
+	walking_buf = buf;
 
 	if (flags & NFACCT_SNPRINTF_F_FULL) {
-		ret = snprintf(buf, rem,
-			"{ pkts = %.20"PRIu64", bytes = %.20"PRIu64" } = %s;",
+		ret = snprintf(walking_buf, temp,
+			"{ pkts = %.20"PRIu64", bytes = %.20"PRIu64"",
 			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_PKTS),
-			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES),
+			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES));
+
+		if (nfacct->flags) {
+			uint32_t mode;
+
+			mode = nfacct_attr_get_u64(nfacct, NFACCT_ATTR_FLAGS);
+
+			walking_buf += ret;
+			temp -= ret;
+			ret = snprintf(walking_buf, temp,
+				", quota = %.20"PRIu64", mode = %s",
+				nfacct_attr_get_u64(nfacct, NFACCT_ATTR_QUOTA),
+				mode == NFACCT_F_QUOTA_BYTES ?
+				"byte" : "packet");
+		}
+
+		walking_buf += ret;
+		temp -= ret;
+		ret = snprintf(walking_buf, temp, " } = %s;",
 			nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME));
 	} else {
 		ret = snprintf(buf, rem, "%s\n",
@@ -424,6 +470,12 @@ void nfacct_nlmsg_build_payload(struct nlmsghdr *nlh, struct nfacct *nfacct)
 
 	if (nfacct->bitset & (1 << NFACCT_ATTR_BYTES))
 		mnl_attr_put_u64(nlh, NFACCT_BYTES, htobe64(nfacct->bytes));
+
+	if (nfacct->bitset & (1 << NFACCT_ATTR_FLAGS))
+		mnl_attr_put_u32(nlh, NFACCT_FLAGS, htobe32(nfacct->flags));
+
+	if (nfacct->bitset & (1 << NFACCT_ATTR_QUOTA))
+		mnl_attr_put_u64(nlh, NFACCT_QUOTA, htobe64(nfacct->quota));
 }
 EXPORT_SYMBOL(nfacct_nlmsg_build_payload);
 
@@ -478,6 +530,13 @@ nfacct_nlmsg_parse_payload(const struct nlmsghdr *nlh, struct nfacct *nfacct)
 			    be64toh(mnl_attr_get_u64(tb[NFACCT_PKTS])));
 	nfacct_attr_set_u64(nfacct, NFACCT_ATTR_BYTES,
 			    be64toh(mnl_attr_get_u64(tb[NFACCT_BYTES])));
+
+	if (tb[NFACCT_FLAGS] && tb[NFACCT_QUOTA]) {
+		uint32_t flags = be32toh(mnl_attr_get_u32(tb[NFACCT_FLAGS]));
+		nfacct_attr_set(nfacct, NFACCT_ATTR_FLAGS, &flags);
+		nfacct_attr_set_u64(nfacct, NFACCT_ATTR_QUOTA,
+			    be64toh(mnl_attr_get_u64(tb[NFACCT_QUOTA])));
+	}
 
 	return 0;
 }

@@ -14,6 +14,8 @@ enum nfacct_attr_type {
 	NFACCT_ATTR_NAME = 0,
 	NFACCT_ATTR_PKTS,
 	NFACCT_ATTR_BYTES,
+	NFACCT_ATTR_FLAGS,
+	NFACCT_ATTR_QUOTA,
 };
 
 struct nfacct *nfacct_alloc(void);
