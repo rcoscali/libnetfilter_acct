@@ -21,4 +21,15 @@
 #	endif
 #endif
 
+#define SNPRINTF_CHECK(ret, rem, offset, len)			\
+do {								\
+	if (ret < 0)						\
+		return ret;					\
+	len += ret;						\
+	if (ret > rem)						\
+		ret = rem;					\
+	offset += ret;						\
+	rem -= ret;						\
+} while (0)
+
 #endif

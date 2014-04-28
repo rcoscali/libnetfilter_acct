@@ -256,42 +256,37 @@ static int
 nfacct_snprintf_plain(char *buf, size_t rem, struct nfacct *nfacct,
 		      uint16_t flags)
 {
-	int ret, temp;
-	char *walking_buf;
-
-	temp = rem;
-	walking_buf = buf;
+	int ret, offset = 0, len = 0;
 
 	if (flags & NFACCT_SNPRINTF_F_FULL) {
-		ret = snprintf(walking_buf, temp,
+		ret = snprintf(buf, rem,
 			"{ pkts = %.20"PRIu64", bytes = %.20"PRIu64"",
 			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_PKTS),
 			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES));
+		SNPRINTF_CHECK(ret, rem, offset, len);
 
 		if (nfacct->flags) {
 			uint32_t mode;
 
 			mode = nfacct_attr_get_u64(nfacct, NFACCT_ATTR_FLAGS);
 
-			walking_buf += ret;
-			temp -= ret;
-			ret = snprintf(walking_buf, temp,
+			ret = snprintf(buf + offset, rem,
 				", quota = %.20"PRIu64", mode = %s",
 				nfacct_attr_get_u64(nfacct, NFACCT_ATTR_QUOTA),
 				mode == NFACCT_F_QUOTA_BYTES ?
 				"byte" : "packet");
+			SNPRINTF_CHECK(ret, rem, offset, len);
 		}
 
-		walking_buf += ret;
-		temp -= ret;
-		ret = snprintf(walking_buf, temp, " } = %s;",
+		ret = snprintf(buf + offset, rem, " } = %s;",
 			nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME));
 	} else {
 		ret = snprintf(buf, rem, "%s\n",
 			nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME));
 	}
+	SNPRINTF_CHECK(ret, rem, offset, len);
 
-	return ret;
+	return len;
 }
 
 #define BUFFER_SIZE(ret, size, rem, offset)		\
