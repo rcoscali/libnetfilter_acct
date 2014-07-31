@@ -267,14 +267,22 @@ nfacct_snprintf_plain(char *buf, size_t rem, struct nfacct *nfacct,
 
 		if (nfacct->flags) {
 			uint32_t mode;
+			char *mode_name;
 
 			mode = nfacct_attr_get_u64(nfacct, NFACCT_ATTR_FLAGS);
+			if (mode & NFACCT_F_QUOTA_PKTS)
+				mode_name = "packet";
+			else if (mode & NFACCT_F_QUOTA_BYTES)
+				mode_name = "byte";
+			else
+				mode_name = "unknown";
 
 			ret = snprintf(buf + offset, rem,
-				", quota = %.20"PRIu64", mode = %s",
+				", quota = %.20"PRIu64", mode = %s"\
+				", overquota = %s",
 				nfacct_attr_get_u64(nfacct, NFACCT_ATTR_QUOTA),
-				mode == NFACCT_F_QUOTA_BYTES ?
-				"byte" : "packet");
+				mode_name,
+				mode & NFACCT_F_OVERQUOTA ? "yes" : "no");
 			SNPRINTF_CHECK(ret, rem, offset, len);
 		}
 
