@@ -297,6 +297,49 @@ nfacct_snprintf_plain(char *buf, size_t rem, struct nfacct *nfacct,
 	return len;
 }
 
+static int
+nfacct_snprintf_json(char *buf, size_t rem, struct nfacct *nfacct,
+		     uint16_t flags)
+{
+	int ret = 0, offset = 0, len = 0;
+
+	if (flags & NFACCT_SNPRINTF_F_FULL) {
+		ret = snprintf(buf, rem,
+			"  { \"pkts\" : %"PRIu64", \"bytes\" : %"PRIu64"",
+			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_PKTS),
+			nfacct_attr_get_u64(nfacct, NFACCT_ATTR_BYTES));
+		SNPRINTF_CHECK(ret, rem, offset, len);
+
+		if (nfacct->flags) {
+			uint32_t mode;
+			char *mode_name;
+
+			mode = nfacct_attr_get_u64(nfacct, NFACCT_ATTR_FLAGS);
+			if (mode & NFACCT_F_QUOTA_PKTS)
+				mode_name = "packet";
+			else if (mode & NFACCT_F_QUOTA_BYTES)
+				mode_name = "byte";
+			else
+				mode_name = "unknown";
+
+			ret = snprintf(buf + offset, rem,
+				", \"quota\" : %"PRIu64", \"mode\" = \"%s\""\
+				", \"overquota\" = %u",
+				nfacct_attr_get_u64(nfacct, NFACCT_ATTR_QUOTA),
+				mode_name,
+				mode & NFACCT_F_OVERQUOTA ? 1 : 0);
+			SNPRINTF_CHECK(ret, rem, offset, len);
+		}
+
+		ret = snprintf(buf + offset, rem, ", \"name\" : \"%s\" }",
+			nfacct_attr_get_str(nfacct, NFACCT_ATTR_NAME));
+	}
+	/* non-F_FULL doesn't seem to make sense in JSON */
+	SNPRINTF_CHECK(ret, rem, offset, len);
+
+	return len;
+}
+
 #define BUFFER_SIZE(ret, size, rem, offset)		\
 	size += ret;					\
 	if (ret > rem)					\
@@ -392,6 +435,9 @@ int nfacct_snprintf(char *buf, size_t size, struct nfacct *nfacct,
 		break;
 	case NFACCT_SNPRINTF_T_XML:
 		ret = nfacct_snprintf_xml(buf, size, nfacct, flags);
+		break;
+	case NFACCT_SNPRINTF_T_JSON:
+		ret = nfacct_snprintf_json(buf, size, nfacct, flags);
 		break;
 	default:
 		ret = -1;
